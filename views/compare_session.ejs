@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Home</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+    </head>
+    <body>
+        <div class="container-fluid">
+            <h3 id = "sentence" style = "text-align: center;"><%= sentence_content %></h3>
+            <h5 id = "ID" style = "text-align : center">ID : <%= num_id %></h5>
+            <h5 id = "base" style = "text-align : center">Base detected by parser: <%= base %></h5>
+            <h5 id = "target" style = "text-align : center">Target detected by parser: <%= target %></h5>
+            <div class="row">
+                <div class="col-sm-6" >
+                    <form class="" action="/compare/" method="post">
+                        <input type="submit" name="btn" value="Yes" class = "btn btn-danger center-block">
+                    </form>
+                </div>
+                <form class="" action="/compare/" method="post">
+                    <input type="submit" name="btn" value="No" class = "btn btn-primary center-block">
+                </form>
+            </div>
+            <h3 id = "agree" style = "text-align: center;">Agree: <%= agree %></h3>
+            <h3 id = "disagree" style = "text-align: center;">Disagree: <%= disagree %></h3>
+            <h3 id = "percentage" style = "text-align: center;">Percentage: <%= percentage %> %</h3>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type = "text/javascript">
+            setInterval(function(){
+                fetch('/compare/confirmed', {method: 'GET'})
+                .then(function(res){
+                    if (res.ok) return res.json();
+                    throw new Error('Request failed');
+                })
+                .then(function(data){
+                    document.getElementById("sentence").innerHTML = `${data.sentence_content}`;
+                    document.getElementById("ID").innerHTML = `ID : ${data.num_id}`;
+                    document.getElementById("base").innerHTML = `Base detected by parser: ${data.base}`;
+                    document.getElementById("target").innerHTML =`Target detected by parser ${data.target}`;
+                    document.getElementById("agree").innerHTML = `Agree: ${data.agree}`;
+                    document.getElementById("disagree").innerHTML = `Disagree: ${data.disagree}`;
+                    document.getElementById("percentage").innerHTML = `Percentage: ${data.percentage}%`;
+                })
+                .catch(function(err){
+                    console.log(err);
+                });
+            }, 1000);
+        </script>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title><%= user_name %></title>
+    </head>
+    <body>
+        <h2> You are logged in as <%= user_name %></h2>
+        <p> Labelling for fun - unlabelled sentences</p>
+        <form class="" action="start_session" method="post">
+            <label for="number"><b>Number of sentences for this session</b></label>
+            <input type="text" name="number">
+            <input type="submit" value="Submit">
+        </form>
+        <h2> Compare and relabelling other people's work</h2>
+        <form class="" action="/compare" method="get">
+            <ul class = "existing_users">
+                <% for (var i = 0; i < users.length; i++) {  %>
+                <li class = "user">
+                    <span><%= users[i].username %></span>
+                    <span><input type="submit" name="relabel" value="Start"></span>
+                </li>
+                <% } %>
+            </ul>
+        </form>
+        <h2>Labelling existing sentences contributed by everyone</h2>
+        <form class="" action="/session" method="post">
+            <input type="submit" name="label_exist" value="Start">
+        </form>
+
+    </body>
+</html>
