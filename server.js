@@ -47,11 +47,15 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
     }
     database = db.db("analogy");
     // start the express web server listening on 8080
-    app.listen(8080, () => {
-        console.log('listening on 8080');
-    });
-});
 
+});
+let port = process.env.PORT;
+if (port == null || port == ""){
+    port = 8080;
+}
+app.listen(port, () => {
+    console.log('Server has started');
+});
 function checkSignIn(req, res, next) {
     if (req.session.user) {
         console.log("logged in");
