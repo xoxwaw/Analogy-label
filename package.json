@@ -9,7 +9,7 @@
   "author": "Phi Nguyen",
   "license": "ISC",
   "engines": {
-    "node" : "6.11.0"
+    "node": "6.11.0"
   },
   "dependencies": {
     "bcrypt": "^3.0.2",
