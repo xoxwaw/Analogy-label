@@ -21,79 +21,74 @@ var base = "";
 var target = "";
 var label = 0;
 
-
-module.exports = {
-    updateContent : function(c, s, b, t){
-        num_id = c;
-        sentence = s;
-        base = b;
-        target = t;
-    },
-
-    updateLabel : function(positive_rating, negative_rating, username){
-        let new_label;
-        if (positive_rating === 1){
-            new_label = {positive_rating: 1};
-            label = 1;
-        }else{
-            new_label = {negative_rating : 1};
-            label = 0;
-        }
-        Analogy.find({'num_id' : counter}, function(err, data){
+function userUpdate(username,data){
+    User.find({'username' : username,
+    'labelled_sentences' : {
+        $elemMatch : {'sentence': data.sentence}} },function(err,result){
             if (err){
                 console.log(err);
                 return;
-            }else if(data.length === 0){
-                new_label = new Analogy({
-                    num_id: counter,
-                    sentence: sentence,
-                    base: base,
-                    target: target,
-                    positive_rating: positive_rating,
-                    negative_rating: negative_rating,
-                    review: "Hello there"
+            }else if (result.length === 0){
+                User.updateOne({'username': username}, {
+                    $push: {'labelled_sentences' : data},
+                    $set: {'number_of_sent' : data.num_id}
+                },function(err,result){
+                    if (err) throw err;
+                    console.log("Created successfully for this user");
                 });
-                new_label.save();
-                console.log("new entry registered");
             }else{
-                User.find({'username' : username, 'labelled_sentences.sentence' : sentence}, function(err,userData){
-                    if (err){
-                        console.log(err);
-                        return;
-                    }else if (userData.length === 0){
-                        User.updateOne({username : username},
-                        { $push : {labelled_sentences : {
-                            num_id: counter,
-                            sentence: sentence,
-                            base: base,
-                            target: target
-                        }}},
-                        function(err, temp){
-                            if (err) console.log(err);
-                            else console.log("Logged into new entry of user");
-                        });
-                    }else{
-                        User.updateOne({'username':username,
-                        'labelled_sentences.sentence' : sentence},
-                        {$set : {'labelled_sentences.label' : label}}), function(err, temp){
-                            if (err) console.log(err);
-                            else console.log("Successfully update the user data");
-                        }
-                    }
+                console.log(result);
+                User.updateOne({'username': username,
+                    'labelled_sentences': {$elemMatch : {'sentence': data.sentence} }
+                },
+                {$set: {'labelled_sentences.$.label' : data.label, 'number_of_sent' : data.num_id} },function(err,result){
+                    if (err) throw err;
+                    console.log("Update successfully for this user");
                 });
-                Analogy.updateOne(
-                    { sentence: sentence },
-                    { $inc : new_label},
-                    function(err, data){
-                        if (err){
-                            console.log(err);
-                        }else{
-                            console.log("Successfully update the data");
-                        }
-                    }
-                );
             }
-        });
+        })
+}
+
+function poolUpdate(data){
+    var new_label;
+    var positive_rating;
+    var negative_rating;
+    if (data.label == 1){
+        new_label = {positive_rating : 1};
+        positive_rating = 1;
+    }else if (data.label == 0){
+        new_label = {negative_rating : 1};
+        negative_rating = 1;
+    }
+
+    Analogy.find({'num_id' : data.num_id},function(err,result){
+        if (err){
+            console.log(err);
+            return;
+        }else if (result.length===0){
+            new_label = new Analogy({
+                num_id: data.num_id,
+                sentence: data.sentence,
+                base: data.base,
+                target: data.target,
+                positive_rating: positive_rating,
+                negative_rating: negative_rating,
+            });
+            new_label.save();
+            console.log("new entry registered");
+        }else{
+            Analogy.updateOne({'num_id' : data.num_id}, {$inc : {'label' : data.label}}, function(err,result){
+                if (err) throw err;
+                console.log("new entry updated!");
+            });
+        }
+    })
+}
+
+module.exports = {
+    updateLabel : function(data, username){
+        userUpdate(username,data);
+        poolUpdate(data);
     }
 
 
