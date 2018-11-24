@@ -5,9 +5,9 @@ var app = express();
 var multer = require('multer');
 var upload = multer();
 var session = require('express-session');
-var cookieParser = require('cookie-parser');
+// var cookieParser = require('cookie-parser');
 app.use(upload.array());
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(session({
     secret: "Your secret key"
 }));

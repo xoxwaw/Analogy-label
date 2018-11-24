@@ -12,10 +12,10 @@ var app = express();
 
 var multer = require('multer'),
     upload = multer(),
-    session = require('express-session'),
-    cookieParser = require('cookie-parser');
+    session = require('express-session');
+    // cookieParser = require('cookie-parser');
 app.use(upload.array());
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(session({
     secret: "Your secret key"
 }));
@@ -53,9 +53,6 @@ let port = process.env.PORT;
 if (port == null || port == ""){
     port = 8080;
 }
-app.listen(port, () => {
-    console.log('Server has started');
-});
 function checkSignIn(req, res, next) {
     if (req.session.user) {
         console.log("logged in");
@@ -64,7 +61,7 @@ function checkSignIn(req, res, next) {
         var err = new Error("Not logged in!");
         console.log(req.session.user);
         res.redirect('/login');
-        next(err); //Error, trying to access unauthorized page!
+        // next(err); //Error, trying to access unauthorized page!
     }
 }
 
@@ -126,4 +123,7 @@ app.post('/Yes', (req, res) => {
 app.post('/No', (req, res) => {
     label.updateLabel(0, 1, 'phnguyen17');
     res.redirect("/");
+});
+app.listen(port, () => {
+    console.log('Server has started');
 });
