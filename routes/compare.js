@@ -101,10 +101,11 @@ function updateDisplay() {
         target = String(result['labelled_sentences'][0]['target']);
     });
     var twoUserQuery = findTwoUsersSimilarity('barbeda', 'phnguyen17');
-    // twoUserQuery.exec(function(err,result){
-    //     disagree = result[0]["disagreeNum"];
-    //     agree = result[0]["agreeNum"];
-    // });
+    twoUserQuery.exec(function(err,result){
+        console.log(result);
+        agree = result[0]['agreeNum'];
+        disagree = result[0]['disagreeNum'];
+    });
     if (agree + disagree > 0) {
         percentage = agree / (agree + disagree) * 100;
     }
