@@ -24,6 +24,7 @@ app.set('view engine', 'ejs');
 
 User = require('../modules/User');
 
+
 router.get("/", (req,res) => {
     res.render("login", {
         message: ""
@@ -46,6 +47,7 @@ router.post("/", (req,res) => {
             if (data[0].password === req.body.pwd) {
                 req.session.user = data;
                 username = req.body.uname;
+                // globalVar.username = username
                 res.redirect("/home");
             } else {
                 res.render("login", {

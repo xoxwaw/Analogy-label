@@ -1,3 +1,6 @@
+var globalVar = {
+    username: ''
+};
 const express = require('express');
 var   login = require(__dirname + '/routes/login');
 var compare = require(__dirname + '/routes/compare');
@@ -38,7 +41,7 @@ var sentence = "",
     target = "",
     counter = 1,
     username = "";
-var User = require(__dirname + '/modules/User');;
+var User = require(__dirname + '/modules/User');
 
 
 MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
@@ -82,7 +85,7 @@ app.get("/home", checkSignIn, (req, res) => {
     User.find({}, function(err,result){
         if (err) throw err;
         res.render("profile", {
-            user_name: username,
+            user_name: globalVar.username,
             users: result
         });
     });
