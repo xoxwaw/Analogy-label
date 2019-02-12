@@ -5,7 +5,7 @@ var app = express();
 var multer = require('multer');
 var upload = multer();
 var session = require('express-session');
-// var cookieParser = require('cookie-parser');
+
 app.use(upload.array());
 // app.use(cookieParser());
 app.use(session({
@@ -24,7 +24,7 @@ app.set('view engine', 'ejs');
 
 User = require('../modules/User');
 
-
+var username = "";
 router.get("/", (req,res) => {
     res.render("login", {
         message: ""
@@ -47,7 +47,6 @@ router.post("/", (req,res) => {
             if (data[0].password === req.body.pwd) {
                 req.session.user = data;
                 username = req.body.uname;
-                // globalVar.username = username
                 res.redirect("/home");
             } else {
                 res.render("login", {
@@ -57,5 +56,6 @@ router.post("/", (req,res) => {
         }
     });
 });
+
 
 module.exports = router;
