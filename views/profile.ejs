@@ -18,11 +18,16 @@
         </select>
         <input type="submit" value = "Submit">
     </form>
+    <h2>Achievements</h2>
+    <%for (var i = 0; i < corpora.length; i++) { %>
+        <h4>- <%= corpora[i] %>: <%= num_sent[i] %> sentence(s) labeled</h4>
+    <% } %>
     <form class="" action="logout" method="get">
         <ul class="logout">
             <input type="submit" name="relabel" value="Log out" class="btn btn-success">
         </ul>
     </form>
 </body>
+
 
 </html>

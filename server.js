@@ -30,7 +30,6 @@ mongoose.set("useCreateIndex", true);
 const userSchema = new mongoose.Schema({
     username: String,
     password: String,
-    num_sent : Number
 });
 userSchema.plugin(passportLocalMongoose);
 let User = mongoose.model(
@@ -66,11 +65,27 @@ let port = process.env.PORT;
 if (port == null || port == ""){
     port = 8000;
 }
-
+UserInfo = require('./public/User');
+function userQuery(user){
+    var query = UserInfo.find({"username": user});
+    return query;
+}
 app.get("/home", function(req,res){
     if (req.isAuthenticated()){
-        res.render("profile",{
-            user_name: req.user.username
+        var corpora = [],
+            num_sent = [];
+        let query = userQuery(req.user.username);
+        query.exec(function(err,data){
+            if (err) console.log(err);
+            for (var i = 0; i < data[0]["labels"].length; i++){
+                corpora.push(data[0]["labels"][i]["corpus"]);
+                num_sent.push(data[0]["labels"][i]["sent_id"].length);
+            }
+            res.render("profile",{
+                user_name: req.user.username,
+                corpora : corpora,
+                num_sent : num_sent
+            });
         });
     }else{
         console.log("Not signed in");
@@ -84,7 +99,7 @@ app.get("/", (req, res) => {
 
 app.get("/login", (req,res) => {
     res.render("login", {
-        message: "Hello"
+        message: ""
     });
 });
 
