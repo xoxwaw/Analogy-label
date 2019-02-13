@@ -1,6 +1,3 @@
-var globalVar = {
-    username: ''
-};
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -55,6 +52,8 @@ var multer = require('multer'),
     upload = multer();
 
 app.use(upload.array());
+var label = require("./routes/label");
+app.use("/label",label);
 
 let database;
 var sentence = "",
@@ -68,7 +67,7 @@ if (port == null || port == ""){
     port = 8000;
 }
 
-app.get("/checkSignin", function(req,res){
+app.get("/home", function(req,res){
     if (req.isAuthenticated()){
         res.render("profile",{
             user_name: req.user.username
@@ -80,7 +79,7 @@ app.get("/checkSignin", function(req,res){
 });
 
 app.get("/", (req, res) => {
-    res.redirect("/checkSignin");
+    res.redirect("/home");
 });
 
 app.get("/login", (req,res) => {
@@ -98,7 +97,7 @@ app.post("/login", (req,res) => {
         if (err) console.log(err);
         else{
             passport.authenticate("local")(req,res,function(){
-                res.redirect("/checkSignIn");
+                res.redirect("/home");
             });
         }
     })
