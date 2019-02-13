@@ -12,21 +12,36 @@
         <div class="container-fluid">
             <h3 id = "sentence" style = "text-align: center;"><%= sentence_content %></h3>
             <h5 id = "ID" style = "text-align : center">ID : <%= num_id %></h5>
-            <h5 id = "base" style = "text-align : center">Base detected by parser: <%= base %></h5>
-            <h5 id = "target" style = "text-align : center">Target detected by parser: <%= target %></h5>
+            <h5 id = "base" style = "text-align : center">Base detected by parser:</h5>
+            <% for (var i = 0; i < base.length;i++) {%>
+                <h6 style = "text-align: center"> - <%= base[i] %> </h6>
+            <% } %>
+            <h5 id = "target" style = "text-align : center">Target detected by parser:</h5>
+            <% for (var i = 0; i < target.length;i++) {%>
+                <h6 style = "text-align: center"> - <%= target[i] %> </h6>
+            <% } %>
             <div class="row">
                 <div class="col-sm-6" >
-                    <form class="" action="/label/" method="post">
+                    <form class="" action="/label/" method="get">
                         <input type="submit" name="btn" value="Yes" class = "btn btn-danger center-block">
                     </form>
                 </div>
-                <form class="" action="/label/" method="post">
+                <form class="" action="/label/" method="get">
                     <input type="submit" name="btn" value="No" class = "btn btn-primary center-block">
                 </form>
             </div>
             <h3 id = "agree" style = "text-align: center;">Agree: <%= agree %></h3>
             <h3 id = "disagree" style = "text-align: center;">Disagree: <%= disagree %></h3>
             <h3 id = "percentage" style = "text-align: center;">Percentage: <%= percentage %> %</h3>
+            <div class="row">
+                <div class="col-sm-12" >
+                <form id = "commentbox" action="/comment" method="post">
+                    <textarea name="comment" class="center-block" form = "commentbox" rows = "2" cols = "80"></textarea>
+                    <input type="submit" class="center-block" name="submit" value= "Submit">
+                </form>
+                </div>
+            </div>
+
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script type = "text/javascript">

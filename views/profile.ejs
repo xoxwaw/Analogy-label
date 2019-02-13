@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-    <head>
-        <meta charset="utf-8">
-        <title><%= user_name %></title>
-    </head>
-    <body>
-        <h2> You are logged in as <%= user_name %></h2>
-        <form class="" action="/label" method="get">
-            <ul class = "existing_users">
-                <input type="submit" name="relabel" value="Start labelling" class="btn btn-primary">
-            </ul>
-        </form>
-        <form class="" action="/compare/differences" method="get">
-            <ul class = "existing_users">
-                <input type="submit" name="relabel" value="Get Differences" class="btn btn-success">
-            </ul>
-        </form>
-        <form class="" action="logout" method="get">
-            <ul class = "logout">
-                <input type="submit" name="relabel" value="Log out" class="btn btn-success">
-            </ul>
-        </form>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        <%= user_name %>
+    </title>
+</head>
+
+<body>
+    <h2> You are logged in as
+        <%= user_name %>
+    </h2>
+    <form action="/label" method = "POST">
+        <select name = "corpora" id = "corpora" class = "corpora">
+            <option value="Brown">Brown</option>
+        </select>
+        <input type="submit" value = "Submit">
+    </form>
+    <form class="" action="logout" method="get">
+        <ul class="logout">
+            <input type="submit" name="relabel" value="Log out" class="btn btn-success">
+        </ul>
+    </form>
+</body>
+
 </html>
