@@ -1,3 +1,4 @@
+// This file handles labeling process
 var express = require('express');
 var router = express.Router();
 
@@ -19,16 +20,16 @@ const sentenceSchema = new mongoose.Schema({
     target : [String],
     label: [{
         user: String,
-        label: Number,
-        comment: [{
+        label: Number
+    }],
+    comment: [{
+        username: String,
+        time: String,
+        content: String,
+        reply: [{
             username: String,
             time: String,
-            content: String,
-            reply: [{
-                username: String,
-                time: String,
-                content: String
-            }]
+            content: String
         }]
     }]
 });
@@ -40,28 +41,40 @@ let Sentence = mongoose.model(
 
 app.set('view engine', 'ejs');
 UserInfo = require('../public/User');
+// this function returns the next available index in the database
 function findNextId(arr){
+    if (arr.length == 0) return 1;
     for (var i = 0; i < arr.length; i++){
-        if (i != arr[i] - 1) return arr[i]+1;
+        if (i != arr[i] - 1) return i+1;
     }
     return arr[arr.length - 1] + 1;
 }
 
-function sentenceQuery(){
-    var query = Sentence.find({"num_id": num_id, "corpus": corpus, "label.username": username});
+function sentenceQuery(command){//return the query from sentence_index, corpus name, and username in the Sentence database
+    var query = Sentence.find(command);
     return query;
 }
 
-function userQuery(){
+function userQuery(){// return the query from user name and corpus name in user database
     var query = UserInfo.find({"username": username, "labels.corpus": corpus});
     return query;
 }
-
-function findOneAndUpdate(label){
-    var query = sentenceQuery();
-    query.lean().exec(function(err,data){
+function getPercentage(num_id){
+    let positive = 0, negative = 0;
+    agree = Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 1}).count();
+    disagree = Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 0}).count();
+    if (agree + disagree != 0){
+        positive = agree / (agree + disagree) * 100;
+        negative = 100 - positive;
+    }
+    return positive, negative
+}
+function findOneAndUpdate(label){//this function handles the yes and no button
+    //get query from sentence database, to check if this user has labeled this sentence
+    Sentence.find({"num_id": num_id, "corpus": corpus, "label.user": username},function(err,data){
         if (err) console.log(err);
-        else if (data.length == 0){
+        else if (data.length == 0){// if this user has not, then add this user to the sentence db, also add the sentence index into the userdb
+            console.log(data);
             Sentence.updateOne({"num_id": num_id, "corpus": corpus},
                 {$push : {"label": {"user": username, "label": label}}}, function(err, result){
                     if (err) console.log(err);
@@ -72,7 +85,7 @@ function findOneAndUpdate(label){
                     if (err) console.log(err);
                     else console.log("Entry added to user");
                 });
-        }else{
+        }else{// if this user has already labeled, then only update the new label from sentence db
             Sentence.updateOne({"num_id": num_id, "label.username": username},
                 {$set : {"label.$.label": label}}, function(err, result){
                     if (err) console.log(err);
@@ -81,7 +94,35 @@ function findOneAndUpdate(label){
         }
     });
 }
-router.get("/", (req,res)=>{
+router.get("/session", (req,res)=>{
+    if (req.isAuthenticated()){
+        Sentence.find({"num_id": num_id, "corpus": corpus}, function(err,data){
+            if (err) console.log(err);
+            else if (data.length == 0) res.redirect("/home");
+            else{
+                let positive, negative = getPercentage(num_id);
+                let comments = [], users = [], time = [];
+                for (var i = 0; i< data[0]["comment"].length;i++){
+                    comments.push(data[0]["comment"][i]["content"]);
+                    users.push(data[0]["comment"][i]["username"]);
+                    time.push(data[0]["comment"][i]["time"]);
+                }
+                res.render("label_session",{
+                    sentence_content: data[0]["sentence"],
+                    num_id: data[0]["num_id"],
+                    base: data[0]["base"],
+                    target: data[0]["target"],
+                    positive: 0,
+                    negative: 0,
+                    comments: comments,
+                    username: users,
+                    time: time
+                });
+            }
+        });
+    }
+});
+router.get("/start_session", (req,res) => {
     if (req.isAuthenticated()){
         username = req.user.username;
         var query = userQuery();
@@ -89,7 +130,7 @@ router.get("/", (req,res)=>{
             if (err) console.log(err);
             else if (data.length == 0){
                 UserInfo.updateOne({"username": username},
-                    {$push : {"labels" : {"corpus": corpus, "sent_id": [1]}}}, function(err, result){
+                    {$push : {"labels" : {"corpus": corpus}}}, function(err, result){
                         if (err) console.log(err);
                         else console.log("Entry added");
                     });
@@ -98,33 +139,51 @@ router.get("/", (req,res)=>{
                     if (err) console.log(err);
                     else if (data.length == 0) res.redirect("/home");
                     else{
+                        let positive, negative = getPercentage(num_id);
+                        var comments = [], users = [], time = [];
+                        for (var i = 0; i< data[0]["comment"].length;i++){
+                            comments.push(data[0]["comment"][i]["content"]);
+                            users.push(data[0]["comment"][i]["username"]);
+                            time.push(data[0]["comment"][i]["time"])
+                        }
                         res.render("label_session",{
                             sentence_content: data[0]["sentence"],
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
-                            agree: 0,
-                            disagree: 0,
-                            percentage: 0
+                            positive: 0,
+                            negative: 0,
+                            comments: comments,
+                            username: users,
+                            time: time
                         });
                     }
                 });
             }else{
-                let indArr = data[0]["labels"][0]["sent_id"];
-                num_id = findNextId(indArr);
-                console.log(num_id);
+                let numArr = data[0]["labels"][0]["sent_id"];
+                num_id = findNextId(numArr);
                 Sentence.find({"num_id": num_id, "corpus": corpus}, function(err,data){
                     if (err) console.log(err);
                     else if (data.length == 0) res.redirect("/home");
                     else{
+                        let positive, negative = getPercentage(num_id);
+                        let comments = [], users = [], time = [];
+                        for (var i = 0; i< data[0]["comment"].length;i++){
+                            comments.push(data[0]["comment"][i]["content"]);
+                            users.push(data[0]["comment"][i]["username"]);
+                            time.push(data[0]["comment"][i]["time"]);
+                        }
+
                         res.render("label_session",{
                             sentence_content: data[0]["sentence"],
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
-                            agree: 0,
-                            disagree: 0,
-                            percentage: 0
+                            positive: 0,
+                            negative: 0,
+                            comments: comments,
+                            username: users,
+                            time: time
                         });
                     }
                 });
@@ -133,16 +192,16 @@ router.get("/", (req,res)=>{
     }else{
         res.redirect("/home");
     }
-
 });
+
 router.post("/", (req,res)=>{
     corpus = req.body.corpora;
-    res.redirect("/label");
+    res.redirect("/label/start_session");;
 });
 router.post("/Yes",(req,res)=>{
     if (req.isAuthenticated()){
         findOneAndUpdate(1);
-        res.redirect("/label");
+        res.redirect('/label/session');
     }else{
         res.redirect("/home");
     }
@@ -150,7 +209,52 @@ router.post("/Yes",(req,res)=>{
 router.post("/No", (req,res) =>{
     if (req.isAuthenticated()){
         findOneAndUpdate(0);
-        res.redirect("/label");
+        res.redirect('/label/session');
+    }else{
+        res.redirect("/home");
+    }
+});
+router.get("/", (req,res)=>{
+    if (req.isAuthenticated()){
+        num_id++;
+        var sent_query = sentenceQuery({"num_id": num_id, "corpus": corpus});
+        sent_query.exec(function(err,data){
+            if (err) console.log(err);
+            else if (data.length == 0) res.redirect("/home");
+            else{
+                let positive, negative = getPercentage(num_id);
+                let comments = [], users = [], time = [];
+                for (var i = 0; i< data[0]["comment"].length;i++){
+                    comments.push(data[0]["comment"][i]["content"]);
+                    users.push(data[0]["comment"][i]["username"]);
+                    time.push(data[0]["comment"][i]["time"]);
+                }
+                res.render("label_session",{
+                    sentence_content: data[0]["sentence"],
+                    num_id: data[0]["num_id"],
+                    base: data[0]["base"],
+                    target: data[0]["target"],
+                    positive: 0,
+                    negative: 0,
+                    comments: comments,
+                    username: users,
+                    time: time
+                });
+            }
+        });
+
+    }else{
+        res.redirect("/home");
+    }
+});
+router.post("/comment", (req,res) =>{
+    if (req.isAuthenticated()){
+        Sentence.update({"num_id": num_id, "corpus": corpus},
+            {$push: {"comment": {"username":username, "content": req.body.comment, "time": new Date()}}}, function(err,data){
+                if (err) console.log(err);
+                else console.log("comment added");
+            });
+        res.redirect("/label/session");
     }else{
         res.redirect("/home");
     }
