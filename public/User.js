@@ -3,7 +3,8 @@ const userSchema = new mongoose.Schema({
     username: String,
     labels : [{
         corpus: String,
-        sent_id: []
+        sent_id: [],
+        favorite_id : []
     }]
 });
 let UserInfo = mongoose.model(

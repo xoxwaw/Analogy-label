@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var app = express();
 var username = "",
     corpus = "",
-    num_id = 0,
+    num_id = global.num_id,
     agree = 0,
     disagree = 0;
 const bodyParser = require('body-parser');
@@ -150,7 +150,8 @@ router.get("/start_session", (req,res) => {
                 });
             }else{
                 let numArr = data[0]["labels"][0]["sent_id"];
-                num_id = findNextId(numArr);
+                global.num_id = findNextId(numArr);
+                num_id = global.num_id;
                 Sentence.find({"num_id": num_id, "corpus": corpus}, function(err,data){
                     if (err) console.log(err);
                     else if (data.length == 0) res.redirect("/home");
@@ -200,7 +201,8 @@ router.post("/No", (req,res) =>{
 });
 router.get("/", (req,res)=>{
     if (req.isAuthenticated()){
-        num_id++;
+        global.num_id++;
+        num_id = global.num_id;
         var sent_query = sentenceQuery({"num_id": num_id, "corpus": corpus});
         sent_query.exec(function(err,data){
             if (err) console.log(err);
@@ -250,6 +252,22 @@ router.post("/reply",(req,res)=>{
     }else{
         res.redirect("/home");
     }
+});
+router.post("/save",(req,res)=>{
+    UserInfo.find({"username": username, "labels.corpus": corpus, "labels" :{$elemMatch:{"favorite_id": req.body.submit}}},function(err,data){
+        if (err) console.log(err);
+        else if (data.length == 0){
+            UserInfo.updateOne({"username": username, "labels.corpus": corpus}, {$push: {"labels.$.favorite_id": req.body.submit}},function(err,result){
+                if (err) console.log(err);
+                else {
+                    console.log(req.body.submit);
+                }
+            });
+        }
+        global.num_id = req.body.submit;
+
+        res.redirect("/label/session");
+    });
 });
 
 module.exports = router;

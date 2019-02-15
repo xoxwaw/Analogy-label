@@ -49,7 +49,7 @@ passport.deserializeUser(function(id, done) {
 });
 var multer = require('multer'),
     upload = multer();
-var global = {num_id: 1, corpus : "Brown"};
+var global = {num_id: 1, corpus : "Brown", isQuery: false};
 app.use(upload.array());
 var label = require("./routes/label");
 app.use("/label",label);
@@ -78,14 +78,13 @@ app.get("/home", function(req,res){
         let query = userQuery(req.user.username);
         query.exec(function(err,data){
             if (err) console.log(err);
-            for (var i = 0; i < data[0]["labels"].length; i++){
-                corpora.push(data[0]["labels"][i]["corpus"]);
-                num_sent.push(data[0]["labels"][i]["sent_id"].length);
-            }
+            // for (var i = 0; i < data[0]["labels"].length; i++){
+            //     corpora.push(data[0]["labels"][i]["corpus"]);
+            //     num_sent.push(data[0]["labels"][i]["sent_id"].length);
+            // }
             res.render("profile",{
                 user_name: req.user.username,
-                corpora : corpora,
-                num_sent : num_sent
+                corpora : data[0]["labels"],
             });
         });
     }else{

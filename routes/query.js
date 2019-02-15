@@ -27,12 +27,16 @@ router.get("/", (req,res) => {
     }
 
 });
-router.get("/user", (req,res)=>{
-    var userQuery = UserInfo.find({"username": req.body.username});
+router.post("/user", (req,res)=>{
+    var userQuery = UserInfo.find({"username": req.body.users});
     userQuery.exec(function(err,data){
         if (err) console.log(err);
         else{
-            result["num_sent"] = data[0]["labels"].length;
+            res.render("user",{
+                user: username,
+                username: req.body.users,
+                corpora: data[0]["labels"]
+            })
         }
     });
     console.log(result);
@@ -45,7 +49,8 @@ router.post("/sentence",(req,res)=>{
         else if (data.length == 0) res.send("<h1>There is no such sentence</h1>");
         else{
             global.corpus = req.body.corpus;
-            global.num_id = req.body.num_id
+            global.num_id = req.body.num_id;
+            global.isQuery = true;
             res.redirect("/label/session");
         }
     });

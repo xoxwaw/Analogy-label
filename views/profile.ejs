@@ -38,7 +38,13 @@
         </form>
         <h2>Achievements</h2>
         <%for (var i = 0; i < corpora.length; i++) { %>
-            <h4>- <%= corpora[i] %>: <%= num_sent[i] %> sentence(s) labeled</h4>
+            <h4>- <%= corpora[i]["corpus"] %>: <%= corpora[i]["sent_id"].length %> sentence(s) labeled</h4>
+            <h4 style = "padding-left: 5em">Favorite sentences in the <%=corpora[i]["corpus"]%> corpus:
+                <%for (var j = 0; j < corpora[i]["favorite_id"].length;j++){%>
+                    <p><%=corpora[i]["favorite_id"][j]%>, </p>
+                <%}%>
+
+            </h4>
         <% } %>
     </div>
 
