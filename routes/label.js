@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var app = express();
 var username = "",
     corpus = "",
-    num_id = "",
+    num_id = 0,
     agree = 0,
     disagree = 0;
 const bodyParser = require('body-parser');
@@ -83,18 +83,14 @@ function findOneAndUpdate(label){//this function handles the yes and no button
 }
 router.get("/session", (req,res)=>{
     if (req.isAuthenticated()){
+        if (num_id == 0) num_id = global.num_id;
+        if (corpus == "") corpus = global.corpus;
         Sentence.find({"num_id": num_id, "corpus": corpus}, function(err,data){
             if (err) console.log(err);
             else if (data.length == 0) res.redirect("/home");
             else{
-                let comments = [], users = [], time = [], yesUsers=[], noUsers = [];
+                let yesUsers=[], noUsers = [];
                 let count = getPercentage(num_id);
-                // console.log(negative, positive);
-                for (var i = 0; i< data[0]["comment"].length;i++){
-                    comments.push(data[0]["comment"][i]["content"]);
-                    users.push(data[0]["comment"][i]["username"]);
-                    time.push(data[0]["comment"][i]["time"]);
-                }
                 for (var j = 0; j < data[0]["label"].length;j++){
                     if (data[0]["label"][j]["label"] == 1){
                         yesUsers.push(data[0]["label"][j]["user"]);
@@ -211,12 +207,6 @@ router.get("/", (req,res)=>{
             else if (data.length == 0) res.redirect("/home");
             else{
                 // getPercentage(num_id);
-                let comments = [], users = [], time = [];
-                for (var i = 0; i< data[0]["comment"].length;i++){
-                    comments.push(data[0]["comment"][i]["content"]);
-                    users.push(data[0]["comment"][i]["username"]);
-                    time.push(data[0]["comment"][i]["time"]);
-                }
                 res.render("label_session",{
                     user: username,
                     sentence_content: data[0]["sentence"],

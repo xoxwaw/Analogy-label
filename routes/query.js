@@ -20,8 +20,7 @@ router.get("/", (req,res) => {
     if (req.isAuthenticated()){
         username = req.user.username;
         res.render("query",{
-            user: username,
-            result: result;
+            user: username
         });
     }else{
         res.redirect("/home");
@@ -38,5 +37,17 @@ router.get("/user", (req,res)=>{
     });
     console.log(result);
 });
-router.get("/")
+
+router.post("/sentence",(req,res)=>{
+    var idQuery = Sentence.find({"num_id": req.body.num_id, "corpus": req.body.corpus});
+    idQuery.exec(function(err,data){
+        if (err) console.log(err);
+        else if (data.length == 0) res.send("<h1>There is no such sentence</h1>");
+        else{
+            global.corpus = req.body.corpus;
+            global.num_id = req.body.num_id
+            res.redirect("/label/session");
+        }
+    });
+});
 module.exports = router;

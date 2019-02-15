@@ -49,10 +49,12 @@ passport.deserializeUser(function(id, done) {
 });
 var multer = require('multer'),
     upload = multer();
-
+var global = {num_id: 1, corpus : "Brown"};
 app.use(upload.array());
 var label = require("./routes/label");
 app.use("/label",label);
+var queries = require("./routes/query");
+app.use("/query",queries);
 
 let database;
 var sentence = "",
@@ -60,7 +62,6 @@ var sentence = "",
     target = "",
     counter = 1,
     username = "";
-
 let port = process.env.PORT;
 if (port == null || port == ""){
     port = 8000;

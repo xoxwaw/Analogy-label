@@ -24,7 +24,22 @@
             </div>
         </nav>
         <div class="container">
-            
+            <form action="/query/user" method = "POST">
+                <select name = "users" id = "users" class = "users">
+                    <option value="barbeda">barbeda</option>
+                    <option value="phnguyen17">phnguyen17</option>
+                    <option value="jnislam18">jnislam18</option>
+                    <option value="aegokce16">aegokce16</option>
+                </select>
+                <input type="submit" value = "Find">
+            </form>
+            <form action="/query/sentence" method="POST">
+                <input type="text" name="num_id">
+                <select  name="corpus">
+                    <option value="Brown">Brown</option>
+                </select>
+                <input type="submit" value="Find">
+            </form>
         </div>
 
     </body>
