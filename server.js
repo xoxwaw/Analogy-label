@@ -88,7 +88,6 @@ app.get("/home", function(req,res){
             });
         });
     }else{
-        console.log("Not signed in");
         res.redirect("/login");
     }
 });

@@ -41,12 +41,16 @@
             </form>
         </div>
         <div class="progress">
-            <div class="progress-bar bg-info" role="progressbar" style="width: <%=positive%>%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-            <div class="progress-bar bg-danger" role="progressbar" style="width: <%=negative%>%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar progress-bar-danger" id = "positive" role="progressbar" style="width: <%=positive%>%">
+                Positive
+            </div>
+            <div class="progress-bar progress-bar-info" id = "negative" role="progressbar" style="width: <%=negative%>%">
+                Negative
+            </div>
         </div>
         <div class="col-sm-12">
-            <form class="" action="/label/" method="get">
-                <input type="submit" name="btn" value="Next" class = "btn btn-success center-block">
+            <form class="" action="/label" method="get">
+                <input type="submit" name="btn" value="Next" class="btn btn-success center-block">
             </form>
         </div>
         <div class="row">
@@ -60,8 +64,15 @@
         <div class="row">
             <div class="col-sm-8">
                 <%for (var i = 0; i < comments.length;i++) { %>
-                    <h4 id = "users" style="bold" class = "center-block"><%=username[i]%><h6 id = "time">on <%=time[i]%></h6></h4>
-                    <h4 id = "comments" class = "center-block">-<%=comments[i]%></h4>
+                <h4 id="users" style="bold" class="center-block">
+                    <%=username[i]%>
+                    <h6 id="time">on
+                        <%=time[i]%>
+                    </h6>
+                </h4>
+                <h4 id="comments" class="center-block">
+                    -<%=comments[i]%>
+                </h4>
                 <%}%>
             </div>
         </div>
@@ -70,7 +81,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript">
         setInterval(function() {
-            fetch('/compare/confirmed', {
+            fetch('/label/session', {
                     method: 'GET'
                 })
                 .then(function(res) {
@@ -85,7 +96,8 @@
                     document.getElementById("comments").innerHTML = `${data.comments}`;
                     document.getElementById("users").innerHTML = `${data.username}`;
                     document.getElementById("time").innerHTML = `${data.time}`;
-
+                    document.getElementById("positive").style = `width:${data.positive}%`;
+                    document.getElementById("negative").style = `width:${data.negative}%`;
                 })
                 .catch(function(err) {
                     console.log(err);

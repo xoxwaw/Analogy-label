@@ -6,7 +6,9 @@ var mongoose = require('mongoose');
 var app = express();
 var username = "",
     corpus = "",
-    num_id = "";
+    num_id = "",
+    agree = 0,
+    disagree = 0;
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
     extended: true
@@ -43,6 +45,7 @@ app.set('view engine', 'ejs');
 UserInfo = require('../public/User');
 // this function returns the next available index in the database
 function findNextId(arr){
+    arr.sort();
     if (arr.length == 0) return 1;
     for (var i = 0; i < arr.length; i++){
         if (i != arr[i] - 1) return i+1;
@@ -61,20 +64,28 @@ function userQuery(){// return the query from user name and corpus name in user 
 }
 function getPercentage(num_id){
     let positive = 0, negative = 0;
-    agree = Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 1}).count();
-    disagree = Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 0}).count();
+    var posQuery = Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 1});
+    posQuery.exec(function(err,data){
+        if (err) console.log(err);
+        else agree = data.length;
+    });
+    var negQuery= Sentence.find({"num_id": num_id, "corpus": corpus, "label.label": 0});
+    negQuery.exec(function(err,data){
+        if (err) console.log(err);
+        else disagree = data.length;
+    });
     if (agree + disagree != 0){
         positive = agree / (agree + disagree) * 100;
         negative = 100 - positive;
     }
-    return positive, negative
+    // console.log(positive,negative)
+    return [positive, negative];
 }
 function findOneAndUpdate(label){//this function handles the yes and no button
     //get query from sentence database, to check if this user has labeled this sentence
     Sentence.find({"num_id": num_id, "corpus": corpus, "label.user": username},function(err,data){
         if (err) console.log(err);
         else if (data.length == 0){// if this user has not, then add this user to the sentence db, also add the sentence index into the userdb
-            console.log(data);
             Sentence.updateOne({"num_id": num_id, "corpus": corpus},
                 {$push : {"label": {"user": username, "label": label}}}, function(err, result){
                     if (err) console.log(err);
@@ -86,13 +97,14 @@ function findOneAndUpdate(label){//this function handles the yes and no button
                     else console.log("Entry added to user");
                 });
         }else{// if this user has already labeled, then only update the new label from sentence db
-            Sentence.updateOne({"num_id": num_id, "label.username": username},
+            Sentence.updateOne({"num_id": num_id, "label.user": username},
                 {$set : {"label.$.label": label}}, function(err, result){
                     if (err) console.log(err);
                     else console.log("entry updated");
                 });
         }
     });
+    // getPercentage(num_id);
 }
 router.get("/session", (req,res)=>{
     if (req.isAuthenticated()){
@@ -100,8 +112,9 @@ router.get("/session", (req,res)=>{
             if (err) console.log(err);
             else if (data.length == 0) res.redirect("/home");
             else{
-                let positive, negative = getPercentage(num_id);
                 let comments = [], users = [], time = [];
+                let count = getPercentage(num_id);
+                // console.log(negative, positive);
                 for (var i = 0; i< data[0]["comment"].length;i++){
                     comments.push(data[0]["comment"][i]["content"]);
                     users.push(data[0]["comment"][i]["username"]);
@@ -112,14 +125,16 @@ router.get("/session", (req,res)=>{
                     num_id: data[0]["num_id"],
                     base: data[0]["base"],
                     target: data[0]["target"],
-                    positive: 0,
-                    negative: 0,
+                    positive: count[0],
+                    negative: count[1],
                     comments: comments,
                     username: users,
                     time: time
                 });
             }
         });
+    }else{
+        res.redirect("/home");
     }
 });
 router.get("/start_session", (req,res) => {
@@ -139,7 +154,7 @@ router.get("/start_session", (req,res) => {
                     if (err) console.log(err);
                     else if (data.length == 0) res.redirect("/home");
                     else{
-                        let positive, negative = getPercentage(num_id);
+                        // getPercentage(num_id);
                         var comments = [], users = [], time = [];
                         for (var i = 0; i< data[0]["comment"].length;i++){
                             comments.push(data[0]["comment"][i]["content"]);
@@ -151,8 +166,8 @@ router.get("/start_session", (req,res) => {
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
-                            positive: 0,
-                            negative: 0,
+                            positive: 50,
+                            negative: 50,
                             comments: comments,
                             username: users,
                             time: time
@@ -166,7 +181,7 @@ router.get("/start_session", (req,res) => {
                     if (err) console.log(err);
                     else if (data.length == 0) res.redirect("/home");
                     else{
-                        let positive, negative = getPercentage(num_id);
+                        getPercentage(num_id);
                         let comments = [], users = [], time = [];
                         for (var i = 0; i< data[0]["comment"].length;i++){
                             comments.push(data[0]["comment"][i]["content"]);
@@ -179,8 +194,8 @@ router.get("/start_session", (req,res) => {
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
-                            positive: 0,
-                            negative: 0,
+                            positive: 50,
+                            negative: 50,
                             comments: comments,
                             username: users,
                             time: time
@@ -222,7 +237,7 @@ router.get("/", (req,res)=>{
             if (err) console.log(err);
             else if (data.length == 0) res.redirect("/home");
             else{
-                let positive, negative = getPercentage(num_id);
+                // getPercentage(num_id);
                 let comments = [], users = [], time = [];
                 for (var i = 0; i< data[0]["comment"].length;i++){
                     comments.push(data[0]["comment"][i]["content"]);
@@ -234,8 +249,8 @@ router.get("/", (req,res)=>{
                     num_id: data[0]["num_id"],
                     base: data[0]["base"],
                     target: data[0]["target"],
-                    positive: 0,
-                    negative: 0,
+                    positive: 50,
+                    negative: 50,
                     comments: comments,
                     username: users,
                     time: time
