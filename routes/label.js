@@ -83,8 +83,8 @@ function findOneAndUpdate(label){//this function handles the yes and no button
 }
 router.get("/session", (req,res)=>{
     if (req.isAuthenticated()){
-        if (num_id == 0) num_id = global.num_id;
-        if (corpus == "") corpus = global.corpus;
+        num_id = global.num_id;
+        corpus = global.corpus;
         Sentence.find({"num_id": num_id, "corpus": corpus}, function(err,data){
             if (err) console.log(err);
             else if (data.length == 0) res.redirect("/home");
