@@ -112,13 +112,20 @@ router.get("/session", (req,res)=>{
             if (err) console.log(err);
             else if (data.length == 0) res.redirect("/home");
             else{
-                let comments = [], users = [], time = [];
+                let comments = [], users = [], time = [], yesUsers=[], noUsers = [];
                 let count = getPercentage(num_id);
                 // console.log(negative, positive);
                 for (var i = 0; i< data[0]["comment"].length;i++){
                     comments.push(data[0]["comment"][i]["content"]);
                     users.push(data[0]["comment"][i]["username"]);
                     time.push(data[0]["comment"][i]["time"]);
+                }
+                for (var j = 0; j < data[0]["label"].length;j++){
+                    if (data[0]["label"][j]["label"] == 1){
+                        yesUsers.push(data[0]["label"][j]["user"]);
+                    }else if (data[0]["label"][j]["label"]==0){
+                        noUsers.push(data[0]["label"][j]["user"]);
+                    }
                 }
                 res.render("label_session",{
                     sentence_content: data[0]["sentence"],
@@ -129,7 +136,9 @@ router.get("/session", (req,res)=>{
                     negative: count[1],
                     comments: comments,
                     username: users,
-                    time: time
+                    time: time,
+                    yesUsers: yesUsers,
+                    noUsers: noUsers
                 });
             }
         });
@@ -170,7 +179,9 @@ router.get("/start_session", (req,res) => {
                             negative: 50,
                             comments: comments,
                             username: users,
-                            time: time
+                            time: time,
+                            yesUsers: [],
+                            noUsers: []
                         });
                     }
                 });
@@ -198,7 +209,9 @@ router.get("/start_session", (req,res) => {
                             negative: 50,
                             comments: comments,
                             username: users,
-                            time: time
+                            time: time,
+                            yesUsers: [],
+                            noUsers: []
                         });
                     }
                 });
@@ -253,7 +266,9 @@ router.get("/", (req,res)=>{
                     negative: 50,
                     comments: comments,
                     username: users,
-                    time: time
+                    time: time,
+                    yesUsers: [],
+                    noUsers: []
                 });
             }
         });

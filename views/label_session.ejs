@@ -10,72 +10,94 @@
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 </head>
 
-<body>
+<body data-spy="scroll" data-target="#vote" data-offset="50">
     <div class="container-fluid">
-        <h3 id="sentence" style="text-align: center;">
-            <%= sentence_content %>
-        </h3>
-        <h5 id="ID" style="text-align : center">ID :
-            <%= num_id %>
-        </h5>
-        <h5 id="base" style="text-align : center">Base detected by parser:</h5>
-        <% for (var i = 0; i < base.length;i++) {%>
-        <h6 style="text-align: center"> -
-            <%= base[i] %>
-        </h6>
-        <% } %>
-        <h5 id="target" style="text-align : center">Target detected by parser:</h5>
-        <% for (var i = 0; i < target.length;i++) {%>
-        <h6 style="text-align: center"> -
-            <%= target[i] %>
-        </h6>
-        <% } %>
-        <div class="row">
-            <div class="col-sm-6">
-                <form class="" action="/label/Yes" method="post">
-                    <input type="submit" name="btn" value="Yes" class="btn btn-danger center-block">
+        <div class="fixed-top">
+            <h3 id="sentence" style="text-align: center;">
+                <%= sentence_content %>
+            </h3>
+            <h5 id="ID" style="text-align : center">ID :
+                <%= num_id %>
+            </h5>
+            <h5 id="base" style="text-align : center">Base detected by parser:</h5>
+            <% for (var i = 0; i < base.length;i++) {%>
+            <h6 style="text-align: center"> -
+                <%= base[i] %>
+            </h6>
+            <% } %>
+            <h5 id="target" style="text-align : center">Target detected by parser:</h5>
+            <% for (var i = 0; i < target.length;i++) {%>
+            <h6 style="text-align: center"> -
+                <%= target[i] %>
+            </h6>
+            <% } %>
+            <div class="row">
+                <div class="col-sm-6">
+                    <form class="" action="/label/Yes" method="post">
+                        <input type="submit" name="btn" value="Yes" class="btn btn-danger center-block">
+                    </form>
+                </div>
+                <form class="" action="/label/No" method="post">
+                    <input type="submit" name="btn" value="No" class="btn btn-primary center-block">
                 </form>
             </div>
-            <form class="" action="/label/No" method="post">
-                <input type="submit" name="btn" value="No" class="btn btn-primary center-block">
-            </form>
-        </div>
-        <div class="progress">
-            <div class="progress-bar progress-bar-danger" id = "positive" role="progressbar" style="width: <%=positive%>%">
-                Positive
+            <div class="progress">
+                <div class="progress-bar progress-bar-danger" id="positive" role="progressbar" style="width: <%=positive%>%">
+                    Positive
+                </div>
+                <div class="progress-bar progress-bar-info" id="negative" role="progressbar" style="width: <%=negative%>%">
+                    Negative
+                </div>
             </div>
-            <div class="progress-bar progress-bar-info" id = "negative" role="progressbar" style="width: <%=negative%>%">
-                Negative
-            </div>
-        </div>
-        <div class="col-sm-12">
-            <form class="" action="/label" method="get">
-                <input type="submit" name="btn" value="Next" class="btn btn-success center-block">
-            </form>
-        </div>
-        <div class="row">
             <div class="col-sm-12">
-                <form id="commentbox" action="/label/comment" method="post">
-                    <textarea name="comment" class="center-block" form="commentbox" rows="2" cols="80"></textarea>
-                    <input type="submit" class="center-block" name="submit" value="Submit">
+                <form class="" action="/label" method="get">
+                    <input type="submit" name="btn" value="Next" class="btn btn-success center-block">
                 </form>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-8">
-                <%for (var i = 0; i < comments.length;i++) { %>
-                <h4 id="users" style="bold" class="center-block">
-                    <%=username[i]%>
-                    <h6 id="time">on
-                        <%=time[i]%>
-                    </h6>
-                </h4>
-                <h4 id="comments" class="center-block">
-                    -<%=comments[i]%>
-                </h4>
-                <%}%>
+            <div class="row">
+                <div class="col-sm-12">
+                    <form id="commentbox" action="/label/comment" method="post">
+                        <textarea name="comment" class="center-block" form="commentbox" rows="2" cols="80"></textarea>
+                        <input type="submit" class="center-block" name="submit" value="Submit">
+                    </form>
+                </div>
+            </div>
+            <div class="row" s>
+                <button onclick="showUsers()">Show results</button>
+                <div id="showUsers" style="display: none">
+                    <h4>Positive
+                    <%for (var i = 0; i < yesUsers.length;i++){%>
+                        <p id = "yesUsers"><%=yesUsers[i]%></p>
+                    <%}%>
+                    </h4>
+                    <h4>Negative
+                    <%for (var i = 0; i < noUsers.length;i++){%>
+                        <p id = "noUsers"><%=noUsers[i]%></p>
+                    <%}%>
+                    </h4>
+                </div>
             </div>
         </div>
+
+        <div class="container" >
+            <div class="row" id = "vote">
+                <div class="col-sm-8">
+                    <%for (var i = 0; i < comments.length;i++) { %>
+                    <h4 id="users" style="bold" class="center-block">
+                        <%=username[i]%>
+                        <h6 id="time">on
+                            <%=time[i]%>
+                        </h6>
+                    </h4>
+                    <h4 id="comments" class="center-block">
+                        -
+                        <%=comments[i]%>
+                    </h4>
+                    <%}%>
+                </div>
+            </div>
+        </div>
+
 
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -98,11 +120,23 @@
                     document.getElementById("time").innerHTML = `${data.time}`;
                     document.getElementById("positive").style = `width:${data.positive}%`;
                     document.getElementById("negative").style = `width:${data.negative}%`;
+                    document.getElementById("yesUsers").innerHTML = `${data.yesUsers}`;
+                    document.getElementById("noUsers").innerHTML = `${data.noUsers}`;
                 })
                 .catch(function(err) {
                     console.log(err);
                 });
         }, 1000);
+    </script>
+    <script type="text/javascript">
+        function showUsers() {
+            var x = document.getElementById("showUsers");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
     </script>
 </body>
 
