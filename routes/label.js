@@ -14,35 +14,10 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
-const sentenceSchema = new mongoose.Schema({
-    corpus: String,
-    num_id: Number,
-    sentence: String,
-    base: [String],
-    target : [String],
-    label: [{
-        user: String,
-        label: Number
-    }],
-    comment: [{
-        username: String,
-        time: String,
-        content: String,
-        reply: [{
-            username: String,
-            time: String,
-            content: String
-        }]
-    }]
-});
-let Sentence = mongoose.model(
-    'sentence',
-     sentenceSchema
-);
-
 
 app.set('view engine', 'ejs');
 UserInfo = require('../public/User');
+Sentence = require('../public/Sentence');
 // this function returns the next available index in the database
 function findNextId(arr){
     arr.sort();
@@ -128,15 +103,14 @@ router.get("/session", (req,res)=>{
                     }
                 }
                 res.render("label_session",{
+                    user: username,
                     sentence_content: data[0]["sentence"],
                     num_id: data[0]["num_id"],
                     base: data[0]["base"],
                     target: data[0]["target"],
                     positive: count[0],
                     negative: count[1],
-                    comments: comments,
-                    username: users,
-                    time: time,
+                    comments: data[0]["comment"],
                     yesUsers: yesUsers,
                     noUsers: noUsers
                 });
@@ -164,22 +138,15 @@ router.get("/start_session", (req,res) => {
                     else if (data.length == 0) res.redirect("/home");
                     else{
                         // getPercentage(num_id);
-                        var comments = [], users = [], time = [];
-                        for (var i = 0; i< data[0]["comment"].length;i++){
-                            comments.push(data[0]["comment"][i]["content"]);
-                            users.push(data[0]["comment"][i]["username"]);
-                            time.push(data[0]["comment"][i]["time"])
-                        }
                         res.render("label_session",{
+                            user: username,
                             sentence_content: data[0]["sentence"],
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
                             positive: 50,
                             negative: 50,
-                            comments: comments,
-                            username: users,
-                            time: time,
+                            comments: data[0]["comment"],
                             yesUsers: [],
                             noUsers: []
                         });
@@ -193,23 +160,16 @@ router.get("/start_session", (req,res) => {
                     else if (data.length == 0) res.redirect("/home");
                     else{
                         getPercentage(num_id);
-                        let comments = [], users = [], time = [];
-                        for (var i = 0; i< data[0]["comment"].length;i++){
-                            comments.push(data[0]["comment"][i]["content"]);
-                            users.push(data[0]["comment"][i]["username"]);
-                            time.push(data[0]["comment"][i]["time"]);
-                        }
 
                         res.render("label_session",{
+                            user: username,
                             sentence_content: data[0]["sentence"],
                             num_id: data[0]["num_id"],
                             base: data[0]["base"],
                             target: data[0]["target"],
                             positive: 50,
                             negative: 50,
-                            comments: comments,
-                            username: users,
-                            time: time,
+                            comments: data[0]["comment"],
                             yesUsers: [],
                             noUsers: []
                         });
@@ -258,15 +218,14 @@ router.get("/", (req,res)=>{
                     time.push(data[0]["comment"][i]["time"]);
                 }
                 res.render("label_session",{
+                    user: username,
                     sentence_content: data[0]["sentence"],
                     num_id: data[0]["num_id"],
                     base: data[0]["base"],
                     target: data[0]["target"],
                     positive: 50,
                     negative: 50,
-                    comments: comments,
-                    username: users,
-                    time: time,
+                    comments: data[0]["comment"],
                     yesUsers: [],
                     noUsers: []
                 });
@@ -289,4 +248,18 @@ router.post("/comment", (req,res) =>{
         res.redirect("/home");
     }
 });
+router.post("/reply",(req,res)=>{
+    if (req.isAuthenticated()){
+        console.log(req.body);
+        Sentence.updateOne({"num_id": num_id, "corpus": corpus, "comment.time": req.body.comment},
+        {$push: {"comment.$.reply": {"username": username, "content": req.body.reply, "time": new Date()}}}, function(err,data){
+            if (err) console.log(err);
+            else console.log("reply added");
+        });
+        res.redirect("/label/session");
+    }else{
+        res.redirect("/home");
+    }
+});
+
 module.exports = router;

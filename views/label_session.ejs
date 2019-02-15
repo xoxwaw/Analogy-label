@@ -11,6 +11,21 @@
 </head>
 
 <body data-spy="scroll" data-target="#vote" data-offset="50">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#"><%=user%></a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/home">Home</a></li>
+                <li><a href="/label">Label</a></li>
+                <li><a href="/query">Query</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/logout"><span class="glyphicon glyphicon-log-in"></span> Log Out</a></li>
+            </ul>
+        </div>
+    </nav>
     <div class="container-fluid">
         <div class="fixed-top">
             <h3 id="sentence" style="text-align: center;">
@@ -66,33 +81,45 @@
                 <button onclick="showUsers()">Show results</button>
                 <div id="showUsers" style="display: none">
                     <h4>Positive
-                    <%for (var i = 0; i < yesUsers.length;i++){%>
-                        <p id = "yesUsers"><%=yesUsers[i]%></p>
-                    <%}%>
+                        <%for (var i = 0; i < yesUsers.length;i++){%>
+                        <p id="yesUsers">
+                            <%=yesUsers[i]%>
+                        </p>
+                        <%}%>
                     </h4>
                     <h4>Negative
-                    <%for (var i = 0; i < noUsers.length;i++){%>
-                        <p id = "noUsers"><%=noUsers[i]%></p>
-                    <%}%>
+                        <%for (var i = 0; i < noUsers.length;i++){%>
+                        <p id="noUsers">
+                            <%=noUsers[i]%>
+                        </p>
+                        <%}%>
                     </h4>
                 </div>
             </div>
         </div>
 
-        <div class="container" >
-            <div class="row" id = "vote">
+        <div class="container">
+            <div class="row" id="vote">
                 <div class="col-sm-8">
                     <%for (var i = 0; i < comments.length;i++) { %>
-                    <h4 id="users" style="bold" class="center-block">
-                        <%=username[i]%>
-                        <h6 id="time">on
-                            <%=time[i]%>
-                        </h6>
-                    </h4>
-                    <h4 id="comments" class="center-block">
-                        -
-                        <%=comments[i]%>
-                    </h4>
+
+                    <form action="/label/reply" method="post">
+                        <h4 id="users" class="center-block">
+                            <%=comments[i]["username"]%>
+                            <textarea readonly id="time" name = "comment" rows="1" cols="40"><%=comments[i]["time"]%></textarea>
+                        </h4>
+                        <h5><%=comments[i]["content"]%></h5>
+                        <input id = "reply" name="reply" ></input>
+                        <input type="submit" value="Reply">
+                    </form>
+                        <%for (var j = 0; j < comments[i]["reply"].length;j++){%>
+                        <div class = "center-block" style="padding-left:5em">
+                            <h5><%=comments[i]["reply"][j]["username"]%>
+                            <h6><%=comments[i]["reply"][j]["time"]%></h6>
+                            </h5>
+                            <h5><%=comments[i]["reply"][j]["content"]%></h5>
+                        </div>
+                        <%}%>
                     <%}%>
                 </div>
             </div>
@@ -116,8 +143,6 @@
                     document.getElementById("base").innerHTML = `Base detected by parser: ${data.base}`;
                     document.getElementById("target").innerHTML = `Target detected by parser ${data.target}`;
                     document.getElementById("comments").innerHTML = `${data.comments}`;
-                    document.getElementById("users").innerHTML = `${data.username}`;
-                    document.getElementById("time").innerHTML = `${data.time}`;
                     document.getElementById("positive").style = `width:${data.positive}%`;
                     document.getElementById("negative").style = `width:${data.negative}%`;
                     document.getElementById("yesUsers").innerHTML = `${data.yesUsers}`;
